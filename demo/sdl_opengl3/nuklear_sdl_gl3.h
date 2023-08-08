@@ -13,8 +13,8 @@
 #ifndef NK_SDL_GL3_H_
 #define NK_SDL_GL3_H_
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
 
 NK_API struct nk_context*   nk_sdl_init(SDL_Window *win);
 NK_API void                 nk_sdl_font_stash_begin(struct nk_font_atlas **atlas);
@@ -195,7 +195,7 @@ nk_sdl_render(enum nk_anti_aliasing AA, int max_vertex_buffer, int max_element_b
         {-1.0f,1.0f, 0.0f, 1.0f},
     };
     SDL_GetWindowSize(sdl.win, &width, &height);
-    SDL_GL_GetDrawableSize(sdl.win, &display_width, &display_height);
+    SDL_GetWindowSizeInPixels(sdl.win, &display_width, &display_height);
     ortho[0][0] /= (GLfloat)width;
     ortho[1][1] /= (GLfloat)height;
 
@@ -358,10 +358,10 @@ nk_sdl_handle_event(SDL_Event *evt)
 
     switch(evt->type)
     {
-        case SDL_KEYUP: /* KEYUP & KEYDOWN share same routine */
-        case SDL_KEYDOWN:
+        case SDL_EVENT_KEY_UP : /* KEYUP & KEYDOWN share same routine */
+        case SDL_EVENT_KEY_DOWN :
             {
-                int down = evt->type == SDL_KEYDOWN;
+                int down = evt->type == SDL_EVENT_KEY_DOWN;
                 const Uint8* state = SDL_GetKeyboardState(0);
                 switch(evt->key.keysym.sym)
                 {
@@ -400,10 +400,10 @@ nk_sdl_handle_event(SDL_Event *evt)
             }
             return 1;
 
-        case SDL_MOUSEBUTTONUP: /* MOUSEBUTTONUP & MOUSEBUTTONDOWN share same routine */
-        case SDL_MOUSEBUTTONDOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP : /* MOUSEBUTTONUP & MOUSEBUTTONDOWN share same routine */
+        case SDL_EVENT_MOUSE_BUTTON_DOWN :
             {
-                int down = evt->type == SDL_MOUSEBUTTONDOWN;
+                int down = evt->type == SDL_EVENT_MOUSE_BUTTON_DOWN;
                 const int x = evt->button.x, y = evt->button.y;
                 switch(evt->button.button)
                 {
@@ -417,7 +417,7 @@ nk_sdl_handle_event(SDL_Event *evt)
             }
             return 1;
 
-        case SDL_MOUSEMOTION:
+        case SDL_EVENT_MOUSE_MOTION :
             if (ctx->input.mouse.grabbed) {
                 int x = (int)ctx->input.mouse.prev.x, y = (int)ctx->input.mouse.prev.y;
                 nk_input_motion(ctx, x + evt->motion.xrel, y + evt->motion.yrel);
@@ -425,7 +425,7 @@ nk_sdl_handle_event(SDL_Event *evt)
             else nk_input_motion(ctx, evt->motion.x, evt->motion.y);
             return 1;
 
-        case SDL_TEXTINPUT:
+        case SDL_EVENT_TEXT_INPUT :
             {
                 nk_glyph glyph;
                 memcpy(glyph, evt->text.text, NK_UTF_SIZE);
@@ -433,7 +433,7 @@ nk_sdl_handle_event(SDL_Event *evt)
             }
             return 1;
 
-        case SDL_MOUSEWHEEL:
+        case SDL_EVENT_MOUSE_WHEEL :
             nk_input_scroll(ctx,nk_vec2((float)evt->wheel.x,(float)evt->wheel.y));
             return 1;
     }
